@@ -30,9 +30,9 @@ class Category:
     def __str__(self) -> None:
         out = f'{self.name:*^30}'
         for item in self.ledger:
-            amount = item['amount']
-            description = item['description']
-            out += f"\n{item['description'][:23]}{amount:>{30 - len(description) if len(description) < 23 else 23 }}"
+            amount = f"{item['amount']:.2f}"
+            description = item['description'][:(30-(len(amount)+1))]
+            out += f"\n{description}{amount:>{30 - len(description)}}"
         out += f'\nTotal: {self.get_balance()}'
         return out
 
@@ -40,7 +40,7 @@ from collections import defaultdict
 def create_spend_chart(categories: [Category]) -> None:
     # spent_by_category_value = [0] * len(categories)
     spent_by_category_value = defaultdict(int)
-    for i, categorie in enumerate(categories):
+    for categorie in categories:
         for ledger in categorie.ledger:
             amount = ledger['amount']
             if amount < 0:
@@ -57,13 +57,26 @@ def create_spend_chart(categories: [Category]) -> None:
     print(spent_by_category_value)
     out = 'Percentage spent by category'
 
-    for i in range(11):
-        str_value = f'{str((10 - i) * 10)}|'
+
+    # values
+    for i in range(100, -10, -10):
+        str_value = f'{str(i)}|'
         out += f'\n{str_value:>4}'
-    out += '\n    ' + '-' * 3 * len(categories) + '-'
+        for sv in spent_by_category_value.values():
+            out += ' o ' if i <= sv else ' ' * 3
 
+    # line: -------
+    out += '\n    ' + '-' * 3 * len(categories) + '-\n'
 
-    print(out)
+    # categories name
+    for i in range(max(len(c.name) for c in categories)):
+        out += '   '
+        for j in range(len(categories)):
+            name = categories[j].name[i] if i < len(categories[j].name) else ' '
+            out += f'  {name}'
+        out += '\n'
+
+    return out
 
 
 # Percentage spent by category
@@ -96,6 +109,11 @@ food.withdraw(15.89, "restaurant and more food for dessert")
 clothing = Category("Clothing")
 food.transfer(50, clothing)
 clothing.withdraw(13.4,"qaws")
+auto = Category("Auto")
+auto.deposit(30, 'dep1')
+auto.withdraw(20, 'myjnia')
 print(food)
+print(clothing)
+print(auto)
 
-create_spend_chart([food , clothing])
+print(create_spend_chart([food , clothing, auto]))
