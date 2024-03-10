@@ -19,7 +19,7 @@ class Category:
     def get_balance(self) -> float:
         return sum([i['amount'] for i in self.ledger])
 
-    def transfer(self, amount:float, category_obj) -> None:
+    def transfer(self, amount: float, category_obj) -> None:
         if self.check_funds(amount) == True:
             self.withdraw(amount, f'Transfer to {category_obj.name}')
             category_obj.deposit(amount, f'Transfer from {self.name}')
@@ -31,12 +31,15 @@ class Category:
         out = f'{self.name:*^30}'
         for item in self.ledger:
             amount = f"{item['amount']:.2f}"
-            description = item['description'][:(30-(len(amount)+1))]
+            description = item['description'][:(30 - (len(amount) + 1))]
             out += f"\n{description}{amount:>{30 - len(description)}}"
         out += f'\nTotal: {self.get_balance()}'
         return out
 
+
 from collections import defaultdict
+
+
 def create_spend_chart(categories: [Category]) -> None:
     # spent_by_category_value = [0] * len(categories)
     spent_by_category_value = defaultdict(int)
@@ -53,10 +56,11 @@ def create_spend_chart(categories: [Category]) -> None:
     print(sum_value)
     for key in spent_by_category_value:
         value = spent_by_category_value[key]
-        spent_by_category_value[key] = round((value / sum_value) * 10) * 10
+        print(f'value:{value}')
+        # spent_by_category_value[key] = round((value / sum_value) * 10) * 10
+        spent_by_category_value[key] = int((value / sum_value) * 10) * 10
     print(spent_by_category_value)
     out = 'Percentage spent by category'
-
 
     # values
     for i in range(100, -10, -10):
@@ -64,19 +68,20 @@ def create_spend_chart(categories: [Category]) -> None:
         out += f'\n{str_value:>4}'
         for sv in spent_by_category_value.values():
             out += ' o ' if i <= sv else ' ' * 3
+        out += ' '
 
     # line: -------
     out += '\n    ' + '-' * 3 * len(categories) + '-\n'
 
     # categories name
     for i in range(max(len(c.name) for c in categories)):
-        out += '   '
+        out += '    '
         for j in range(len(categories)):
             name = categories[j].name[i] if i < len(categories[j].name) else ' '
-            out += f'  {name}'
-        out += '\n'
+            out += f' {name} '
+        out += ' \n'
 
-    return out
+    return out[:-1]
 
 
 # Percentage spent by category
@@ -108,12 +113,19 @@ food.withdraw(10.15, "groceries")
 food.withdraw(15.89, "restaurant and more food for dessert")
 clothing = Category("Clothing")
 food.transfer(50, clothing)
-clothing.withdraw(13.4,"qaws")
+clothing.withdraw(20.4, "qaws")
 auto = Category("Auto")
 auto.deposit(30, 'dep1')
-auto.withdraw(20, 'myjnia')
+auto.withdraw(10, 'myjnia')
 print(food)
 print(clothing)
 print(auto)
 
-print(create_spend_chart([food , clothing, auto]))
+food_ = Category("Food")
+food_.deposit(100, 'dep1')
+food_.withdraw(60, 'myjnia')
+
+# print(create_spend_chart([food , clothing, auto]))
+
+print(create_spend_chart([food_, clothing, auto]))
+print('next')
